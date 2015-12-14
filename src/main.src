@@ -1,0 +1,26 @@
+(require 2htdp/image)
+
+(define (range start end step)
+  (if (>= start end)
+      null
+      (cons start (range (+ step start) end step))))
+
+(define (draw-line img small-deg big-deg)
+  (add-line img
+            (+ 200 (* 100 (sin (degrees->radians small-deg))))
+            (+ 200 (* 100 (cos (degrees->radians small-deg))))
+            (+ 200 (* 200 (sin (degrees->radians big-deg))))
+            (+ 200 (* 200 (cos (degrees->radians big-deg))))
+            (make-color (random 255) (random 50) (random 50))))
+
+(define (generate-circle)
+  (begin
+    (define img (overlay
+                 (circle 200 "outline" "red")
+                 (circle 100 "outline" "red")))
+    (for-each (lambda (x)
+                (set! img (draw-line img x (* x 6))))
+              (range 0 360 0.75))
+    img))
+
+(generate-circle)

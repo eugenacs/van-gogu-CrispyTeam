@@ -5,22 +5,71 @@
       null
       (cons start (range (+ step start) end step))))
 
-(define (draw-line img small-deg big-deg)
+(define (draw-line radius-big radius-small img small-deg big-deg randomparam_b)
   (add-line img
-            (+ 200 (* 100 (sin (degrees->radians small-deg))))
-            (+ 200 (* 100 (cos (degrees->radians small-deg))))
-            (+ 200 (* 200 (sin (degrees->radians big-deg))))
-            (+ 200 (* 200 (cos (degrees->radians big-deg))))
-            (make-color (random 255) (random 50) (random 50))))
+            (+ radius-big (* radius-small (sin (degrees->radians small-deg))))
+            (+ radius-big (* radius-small (cos (degrees->radians small-deg))))
+            (+ radius-big (* radius-big (sin (degrees->radians big-deg))))
+            (+ radius-big (* radius-big (cos (degrees->radians big-deg))))
+            (make-color (modulo (* (car randomparam_b) (+ (- 2) (random 2))) 255) (car (cdr randomparam_b)) (car (cdr (cdr randomparam_b))))))
 
-(define (generate-circle)
+(define (generate-circle-seed radius-big radius-small recursion randparam_a randomparam_b)
   (begin
     (define img (overlay
-                 (circle 200 "outline" "red")
-                 (circle 100 "outline" "red")))
+                 (circle radius-big "outline" "black")
+                 (circle radius-small "outline" "black")))
     (for-each (lambda (x)
-                (set! img (draw-line img x (* x 6))))
-              (range 0 360 0.75))
-    img))
+                (set! img (draw-line radius-big radius-small img x (* x randparam_a) randomparam_b)))
+              (range 0 360 (/ 140 radius-big)))
+    (if (> recursion 0)
+        (overlay
+         (rotate 90 (beside
+                     (circle (/ radius-big 5) "solid" "transparent")
+                     (circle radius-big "solid" "transparent")
+                     (generate-circle (/ radius-big 5) (/ radius-small 5) (- recursion 1))
+                     ))
+         (rotate 130 (beside
+                      (circle (/ radius-big 3) "solid" "transparent")
+                      (circle radius-big "solid" "transparent")
+                      (generate-circle (/ radius-big 3) (/ radius-small 3) (- recursion 1))
+                      ))
+         (rotate 50 (beside
+                     (circle (/ radius-big 3) "solid" "transparent")
+                     (circle radius-big "solid" "transparent")
+                     (generate-circle (/ radius-big 3) (/ radius-small 3) (- recursion 1))
+                     ))
+         (rotate 0 (beside
+                    (circle (/ radius-big 2) "solid" "transparent")
+                    (circle radius-big "solid" "transparent")
+                    (generate-circle (/ radius-big 2) (/ radius-small 2) (- recursion 1))
+                    ))
+         (rotate 310 (beside
+                      (circle (/ radius-big 3) "solid" "transparent")
+                      (circle radius-big "solid" "transparent")
+                      (generate-circle (/ radius-big 3) (/ radius-small 3) (- recursion 1))
+                      ))
+         (rotate 270 (beside
+                      (circle (/ radius-big 5) "solid" "transparent")
+                      (circle radius-big "solid" "transparent")
+                      (generate-circle (/ radius-big 5) (/ radius-small 5) (- recursion 1))
+                      ))
+         (rotate 230 (beside
+                      (circle (/ radius-big 3) "solid" "transparent")
+                      (circle radius-big "solid" "transparent")
+                      (generate-circle (/ radius-big 3) (/ radius-small 3) (- recursion 1))
+                      ))
+         (rotate 180 (beside
+                      (circle (/ radius-big 2) "solid" "transparent")
+                      (circle radius-big "solid" "transparent")
+                      (generate-circle (/ radius-big 2) (/ radius-small 2) (- recursion 1))
+                      ))
+         img
+         (circle radius-big "solid" "white"))
+        img)))
 
-(generate-circle)
+(define (generate-circle radius-big radius-small recursion)
+  (begin
+    (define aux (generate-circle-seed radius-big radius-small recursion (+ 3 (random 6)) (list (random 255) (random 150) (random 255))))
+    aux))
+
+(generate-circle 300 250 4)
